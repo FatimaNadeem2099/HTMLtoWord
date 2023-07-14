@@ -1,0 +1,98 @@
+﻿.tbl {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%
+}
+w tbl {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%
+}
+
+.tbl td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+    .tbl th {
+        border-color: black;
+        border-style: solid;
+        border-width: 1px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        font-weight: normal;
+        overflow: hidden;
+        padding: 10px 5px;
+        word-break: normal;
+    }
+
+    .tbl .headstyle0 {
+        border: none;
+        border-top: solid 2px black;
+        font-size: 15px;
+        text-align: left;
+        vertical-align: top
+    }
+
+    .tbl .style0 {
+        border: none;
+        font-size: 15px;
+        text-align: left;
+        vertical-align: top
+    }
+
+    .tbl .style1 {
+        border: none;
+        font-size: 15px;
+        text-align: right;
+        vertical-align: top
+    }
+
+    .tbl .style2 {
+        text-align: right;
+        vertical-align: top
+    }
+
+    .tbl .style3 {
+        padding-bottom: 3px;
+        padding-top: 3px;
+    }
+
+    .tbl .style3a {
+        padding-bottom: 3px;
+        padding-top: 3px;
+        border-bottom: solid 2px black;
+    }
+
+    .tbl .style3b {
+        padding-bottom: 3px;
+        padding-top: 3px;
+        text-align: right;
+    }
+
+    .tbl .style4 {
+        text-align: left;
+        vertical-align: top
+    }
+
+
+@page settings {
+    size:A4 portrait;
+    margin: 0.5in 0.5in 0.5in 0.5in;
+    mso-header-margin: .5in;
+    mso-footer-margin: .5in;
+    mso-paper-source: 0;
+}
+div.page-settings {
+    page: settings;
+}
+.imgsize {
+    max-width: 40px;
+    max-height: 40px;
+}
