@@ -1,26 +1,36 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.Wordprocessing;
+using HtmlAgilityPack;
+using PuppeteerSharp;
+using PuppeteerSharp.Media;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HTMLtoWord
 {
     public partial class SamplePage : System.Web.UI.Page
     {
+        
         protected void Page_Load(object sender, EventArgs e)
         {
 
         }
         private static void SaveDOCX(string fileName, string BodyText, bool isLandScape, double rMargin, double lMargin, double bMargin, double tMargin)
         {
+            
             WordprocessingDocument document = WordprocessingDocument.Open("E:\\HTML to Word converter\\sample.docx", true);
             MainDocumentPart mainDocumenPart = document.MainDocumentPart;
 
@@ -76,7 +86,7 @@ namespace HTMLtoWord
                 document.Dispose();
             }
         }
-        protected void Button1_Click(object sender, EventArgs e)
+        protected async void Button1_Click(object sender, EventArgs e)
         {
            // SaveDOCX("abc", null, false, 0, 0, 0,0);
             string _fileCSS = Server.MapPath("~/css/style.css");
@@ -101,9 +111,9 @@ namespace HTMLtoWord
 
             strHTML.Append("<style>" + _strCSS + "</style></head>");
             strHTML.Append("<body><div class='page-settings'>" + htmlRaw + "</div></body></html>");
-
-
-            using (StreamReader Reader = new StreamReader("E:\\HTML to Word converter\\EmailTemplate.html"))
+            var file = Server.MapPath("XYZ Corporation_template.html");
+            await ReplaceSectionWithImage1(file, "title");
+            using (StreamReader Reader = new StreamReader(file))
             {
                 StringBuilder Sb = new StringBuilder();
                 Sb.Append(Reader.ReadToEnd());
@@ -114,5 +124,106 @@ namespace HTMLtoWord
             Response.Write(Sb.ToString());
             }
         }
+        public static string ExtractSectionById(string htmlFilePath, string sectionId)
+        {
+            string htmlContent = File.ReadAllText(htmlFilePath);
+            var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            htmlDoc.LoadHtml(htmlContent);
+
+            var sectionNode = htmlDoc.GetElementbyId(sectionId);
+            if (sectionNode != null)
+            {
+                return sectionNode.OuterHtml;
+            }
+
+            return null;
+        }
+        public static async Task<string> HtmlToImage(string htmlContent, int width, int height)
+        {
+            var browserFetcher = new BrowserFetcher();
+            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+
+            var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+               
+            });
+
+            var page = await browser.NewPageAsync();
+            await page.SetContentAsync(htmlContent);
+            await page.SetViewportAsync(new ViewPortOptions
+            {
+                Width = width,
+                Height = height
+            });
+            var sectionElementHandle = await page.QuerySelectorAsync("#title");
+           // if (sectionElementHandle != null)
+           // {
+                // Capture the screenshot of the section only
+                var image = await sectionElementHandle.ScreenshotDataAsync(new ScreenshotOptions
+                {
+                    FullPage = false
+                });
+           // }
+                var screenshot = await page.ScreenshotDataAsync();
+            await browser.CloseAsync();
+
+            return Convert.ToBase64String(image);
+        }
+        public static async Task ReplaceSectionWithImage(string htmlFilePath, string sectionId)
+        {
+            string extractedSection = ExtractSectionById(htmlFilePath, sectionId);
+            if (extractedSection != null)
+            {
+                // Convert the extracted section to an image
+                int imageWidth = 40;
+                int imageHeight = 40;
+                string base64Image = await HtmlToImage(extractedSection, imageWidth, imageHeight);
+
+                // Replace the section with an image tag in the original HTML
+                string newHtmlContent = File.ReadAllText(htmlFilePath);
+                newHtmlContent = newHtmlContent.Replace(extractedSection, $"<img src=\"data:image/png;base64,{base64Image}\" alt=\"{sectionId}\">");
+                File.WriteAllText(htmlFilePath, newHtmlContent);
+            }
+        }
+
+
+public static async Task ReplaceSectionWithImage1(string htmlFilePath, string sectionId)
+    {
+            var a = System.IO.Path.GetFullPath(Environment.CurrentDirectory);
+            string extractedSection = ExtractSectionById(htmlFilePath, sectionId);
+        if (extractedSection != null)
+        {
+            // Convert the extracted section to an image
+            int imageWidth = 2240;
+            int imageHeight = 2240;
+            string base64Image = await HtmlToImage(extractedSection, imageWidth, imageHeight);
+
+                // Load the HTML document
+                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            htmlDoc.Load(htmlFilePath);
+
+            // Find the section node by its ID
+            var sectionNode = htmlDoc.GetElementbyId(sectionId);
+            if (sectionNode != null)
+            {
+                // Create a new image node
+                var imageNode = htmlDoc.CreateElement("img");
+                imageNode.SetAttributeValue("src", "data:image/png;base64," + base64Image);
+                imageNode.SetAttributeValue("alt", sectionId);
+
+                // Replace the section node with the image node
+                var parent = sectionNode.ParentNode;
+                parent.ReplaceChild(imageNode, sectionNode);
+                    var newhtml = parent.ParentNode.ParentNode.ParentNode;
+                    File.WriteAllText(htmlFilePath, newhtml.InnerHtml);
+                    // Save the modified HTML back to the file
+                  //  htmlDoc.Save(htmlFilePath);
+
+            }
+        }
     }
+
+
+
+}
 }

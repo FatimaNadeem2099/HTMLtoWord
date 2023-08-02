@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="SamplePage.aspx.cs" Inherits="HTMLtoWord.SamplePage" %>
+﻿<%@ Page Language="C#" Async="true" AutoEventWireup="true" CodeBehind="SamplePage.aspx.cs" Inherits="HTMLtoWord.SamplePage" %>
 
 <!DOCTYPE html>
 
